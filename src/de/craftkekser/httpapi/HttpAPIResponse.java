@@ -1,17 +1,21 @@
 package de.craftkekser.httpapi;
 
-import com.sun.net.httpserver.Headers;
+
+import org.json.JSONObject;
 
 public class HttpAPIResponse {
 	
 	private int responseCode;
-	private String content;
-	private Headers headers;
+	private JSONObject data;
 	
-	public HttpAPIResponse(int responseCode, String content, Headers headers) {
-		this.responseCode = responseCode;
-		this.content = content;
-		this.headers = headers;
+	public HttpAPIResponse(int responseCode, JSONObject data) {
+		this.setResponseCode(responseCode);
+		this.setData(data);
+	}
+	
+	public HttpAPIResponse() {
+		this.setResponseCode(200);
+		this.setData(new JSONObject());
 	}
 
 	public int getResponseCode() {
@@ -22,20 +26,12 @@ public class HttpAPIResponse {
 		this.responseCode = responseCode;
 	}
 
-	public String getContent() {
-		return content;
+	public JSONObject getData() {
+		return data;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public Headers getHeaders() {
-		return headers;
-	}
-
-	public void setHeaders(Headers headers) {
-		this.headers = headers;
+	public void setData(JSONObject data) {
+		this.data = data;
 	}
 
 }

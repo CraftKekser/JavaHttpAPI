@@ -1,63 +1,71 @@
 package de.craftkekser.httpapi;
 
-import java.util.HashMap;
 
-import com.sun.net.httpserver.Headers;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+
+import com.sun.net.httpserver.HttpExchange;
 
 public class HttpAPIRequest {
-	
-	private HttpMethod method;
-	private Headers headers;
-	private HashMap<String, String> query;
-	private HashMap<String, String> body;
-	private HashMap<String, String> content; // mix of query and body
-	
-	public HttpAPIRequest(HttpMethod method, Headers headers) {
-		this.method = method;
-		this.headers = headers;
-		this.query = new HashMap<>();
-		this.body = new HashMap<>();
-		this.content = new HashMap<>();
+
+	private HashMap<String, List<String>> headers;
+	private HashMap<String, String> data;
+	private String[] path;
+
+	public HttpAPIRequest(HttpExchange e) {
+		this.headers = new HashMap<>();
+		this.data = new HashMap<>();
+		e.getRequestHeaders().forEach((h, l) -> {
+			headers.put(h, l);
+		});
+		try {
+			byte[] body = e.getRequestBody().readAllBytes();
+			if(body.length > 0) {
+				String sBody = new String(body, StandardCharsets.UTF_8);
+				String[] params = sBody.split("\\&");
+				for(String s : params) {
+					String[] sq = s.split("=");
+					this.data.put(sq[0], sq[1]);
+				}
+			}
+			// params
+			String sParams = e.getRequestURI().getRawQuery();
+			if(sParams!=null && sParams.length()>0) {
+				String[] params = sParams.split("\\&");
+				for(String s : params) {
+					String[] sq = s.split("=");
+					this.data.put(URLDecoder.decode(sq[0], StandardCharsets.UTF_8), URLDecoder.decode(sq[1], StandardCharsets.UTF_8));
+				}
+			}
+		} catch (IOException e1) {}
+		String context = e.getHttpContext().getPath();
+		String restPath = e.getRequestURI().toString().substring(context.length());
+		if(restPath.contains("?")) {
+			restPath = restPath.substring(0, restPath.indexOf("?"));
+		}
+		if(restPath.startsWith("/")) {
+			restPath = restPath.substring(1);
+		}
+		if(restPath.endsWith("/")) {
+			restPath = restPath.substring(0, restPath.length()-1);
+		}
+		this.path = restPath.trim().length()>0?restPath.split("\\/"):new String[0];
 	}
 
-	public HttpMethod getMethod() {
-		return method;
-	}
-
-	public void setMethod(HttpMethod method) {
-		this.method = method;
-	}
-
-	public Headers getHeaders() {
+	public HashMap<String, List<String>> getHeaders() {
 		return headers;
 	}
 
-	public void setHeaders(Headers headers) {
-		this.headers = headers;
+	public HashMap<String, String> getData() {
+		return data;
 	}
 
-	public HashMap<String, String> getQuery() {
-		return query;
+	public String[] getPath() {
+		return path;
 	}
 
-	public void setQuery(HashMap<String, String> query) {
-		this.query = query;
-	}
-
-	public HashMap<String, String> getBody() {
-		return body;
-	}
-
-	public void setBody(HashMap<String, String> body) {
-		this.body = body;
-	}
-
-	public HashMap<String, String> getContent() {
-		return content;
-	}
-
-	public void setContent(HashMap<String, String> content) {
-		this.content = content;
-	}
 
 }

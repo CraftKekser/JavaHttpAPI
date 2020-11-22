@@ -1,6 +1,7 @@
 package de.craftkekser.httpapi;
 
-public interface HttpAPIAction {
+
+public interface HttpAPIHandler {
 
 	public HttpAPIResponse handle(HttpAPIRequest request);
 	
