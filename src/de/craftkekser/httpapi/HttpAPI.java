@@ -35,9 +35,18 @@ public class HttpAPI {
 
 			@Override
 			public void run() {
-				server.stop(0);
+				forceShutdown();
 			}
 		}));
+	}
+	
+	public void shutdown() {
+		this.server.stop(3);
+	}
+	
+	public void forceShutdown() {
+		this.server.stop(0);
+		this.threadPoolExecutor.shutdownNow();
 	}
 
 	public void addRoute(String method, String path, HttpAPIHandler handler) {
