@@ -39,11 +39,11 @@ public class HttpAPI {
 			}
 		}));
 	}
-	
+
 	public void shutdown() {
 		this.server.stop(3);
 	}
-	
+
 	public void forceShutdown() {
 		this.server.stop(0);
 		this.threadPoolExecutor.shutdownNow();
@@ -69,6 +69,10 @@ public class HttpAPI {
 						if(e.getRequestMethod().equalsIgnoreCase(r.getMethod())) {
 							HttpAPIResponse response = r.getHandler().handle(new HttpAPIRequest(e));
 							byte[] responseContent = response.getData().toString().getBytes(StandardCharsets.UTF_8);
+							for (String header : response.getHeaders().keySet()) {
+								if(!header.equalsIgnoreCase("Content-Type"))
+									e.getResponseHeaders().set(header, response.getHeaders().get(header));
+							}
 							e.getResponseHeaders().add("Content-Type", "text/json");
 							e.sendResponseHeaders(response.getResponseCode(), responseContent.length);
 							e.getResponseBody().write(responseContent);
